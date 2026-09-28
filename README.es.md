@@ -19,7 +19,7 @@ Funciona como un LoRA para el prompt: va entre tu prompt y el `CLIP Text Encode`
 ### 💬 Escribir en globo (`SpeechBubbleRender`)
 Va entre `VAE Decode` y el nodo de guardar. No tiene controles: usa la configuración de **Globo de texto**.
 
-1. Busca los globos: blancos con contorno oscuro y, como respaldo, globos negros con letras dentro.
+1. Busca los globos: blancos con contorno (también fino), blancos sin contorno si tienen letras dentro y, como respaldo, globos negros con letras dentro. Si hay globos unidos (por ejemplo, dos conectados por la colita), los separa.
 2. Borra las letras inventadas por el modelo.
 3. Escribe tu texto con la fuente elegida, partiendo las líneas y ajustando el tamaño para que quepa.
 
@@ -75,6 +75,6 @@ pip install -r requirements.txt
 
 - Frases cortas dan globos más grandes y letras más grandes.
 - Si usas un LoRA Turbo con **CFG 1**, el prompt negativo no tiene efecto, así que no sirve para evitar globos de colores.
-- Si el modelo parte la frase en dos globos, el texto completo va al globo principal.
+- Si el modelo reparte la frase en varios globos, tu texto se reparte entre ellos en orden de lectura, así ninguno se queda con letras de la IA.
 - Las recetas de LoRA Manager y los metadatos de la imagen guardan el prompt **con** la parte del globo ya inyectada. Si reutilizas ese prompt, quita esa parte o apaga el nodo; si no, se añade dos veces.
 - Con LoRA Manager instalado, **Save Recipe** usa la imagen con tu texto ya escrito (no la salida del VAE Decode con las letras de la IA).

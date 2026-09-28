@@ -19,7 +19,7 @@ Works like a LoRA for your prompt: place it between your prompt and `CLIP Text E
 ### 💬 Escribir en globo (`SpeechBubbleRender`)
 Place it between `VAE Decode` and your save node. It has no settings: it uses the config from **Globo de texto**.
 
-1. Finds the bubbles: white with a dark outline and, as a fallback, black bubbles with letters inside.
+1. Finds the bubbles: white ones with an outline (thin outlines too), white ones without an outline if they have letters inside, and, as a fallback, black bubbles with letters inside. Bubbles joined together (e.g. two bubbles connected by the tail) are split apart.
 2. Erases the letters the model made up.
 3. Writes your text with the chosen font, wrapping lines and sizing it to fit.
 
@@ -77,6 +77,6 @@ pip install -r requirements.txt
 
 - Shorter sentences give bigger bubbles and bigger letters.
 - With a Turbo LoRA at **CFG 1** the negative prompt has no effect, so it can't be used to avoid colored bubbles.
-- If the model splits the sentence into two bubbles, the full text goes into the main bubble.
+- If the model spreads the sentence over several bubbles, your text is split across them in reading order, so none keeps the AI's letters.
 - LoRA Manager recipes and image metadata store the prompt **with** the injected bubble part. If you reuse that prompt, remove that part or turn the node off, otherwise it gets added twice.
 - With LoRA Manager installed, **Save Recipe** uses the image with your text already written (not the raw VAE Decode output with the AI's letters).

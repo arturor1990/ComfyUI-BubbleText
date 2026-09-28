@@ -148,16 +148,84 @@ def count_letters(region, filled):
     return int((sizes >= 8).sum())
 
 
+def outline_score(filled, lines):
+    """Fracción del borde del globo con una línea oscura a menos de 3 px (sirve también con contornos finos)."""
+    edge = filled & ~ndimage.binary_erosion(filled)
+    if not edge.any():
+        return 0.0
+    near = ndimage.binary_dilation(lines, iterations=3)
+    return float((edge & near).sum()) / edge.sum()
+
+
+def split_joined(filled, min_area):
+    """Separa globos unidos por una parte estrecha (por ejemplo, dos globos conectados por la colita)."""
+    dist = ndimage.distance_transform_edt(filled)
+    peak = dist.max()
+    for frac in (0.2, 0.3, 0.45, 0.6):
+        seeds, n = ndimage.label(dist > peak * frac)
+        if n < 2:
+            continue
+        # cada píxel del globo pasa a la semilla más cercana
+        _, (iy, ix) = ndimage.distance_transform_edt(seeds == 0, return_indices=True)
+        owner = seeds[iy, ix]
+        parts = [filled & (owner == k) for k in range(1, n + 1)]
+        parts = [pt for pt in parts if pt.sum() >= min_area]
+        if len(parts) >= 2:
+            return parts
+    return []
+
+
+def bubble_metrics(region, filled, lum, lines):
+    area = int(filled.sum())
+    ys, xs = np.nonzero(filled)
+    bh, bw = ys.max() - ys.min() + 1, xs.max() - xs.min() + 1
+    ring = ndimage.binary_dilation(filled, iterations=4) & ~filled
+    paper_px = lum[region]
+    return {
+        "area": area,
+        "extent": area / float(bh * bw),
+        "whiteness": region.sum() / float(area),
+        "solidity": solidity(filled, area),
+        "std": float(paper_px.std()) if paper_px.size else 99.0,
+        "paper": float(np.median(paper_px)) if paper_px.size else 0.0,
+        "ring": float(np.median(lum[ring])) if ring.any() else 0.0,
+        "letters": count_letters(region, filled),
+        "outline": outline_score(filled, lines),
+        "height": int(bh),
+    }
+
+
+def looks_like_bubble(m, dark_paper, min_outline=0.6):
+    # forma: convexa (salvo la colita), no alargada ni hueca, y papel liso sin sombreado
+    # contorno casi completo + letras dentro es casi seguro un globo: se tolera una colita larga
+    strong = not dark_paper and m["outline"] >= 0.8 and m["letters"] >= 8
+    min_solidity, min_extent = (0.75, 0.45) if strong else (0.85, 0.5)
+    if m["extent"] < min_extent or m["whiteness"] < 0.55 or m["solidity"] < min_solidity or m["std"] > 12:
+        return False
+    if dark_paper:
+        # globo negro: alrededor más claro y letras dentro (si no, es pelo, ropa, sombra...)
+        return m["ring"] - m["paper"] >= 50 and m["letters"] >= 4
+    if m["outline"] >= min_outline:
+        return True
+    # globo blanco sin contorno: solo si trae letras y destaca del fondo (las nubes y camisas no tienen letras)
+    return m["letters"] >= 8 and m["paper"] >= 240 and m["paper"] - m["ring"] >= 25
+
+
 def scan_bubbles(rgb, paper_mask, dark_paper):
-    """Componentes lisos y convexos con borde contrastado. dark_paper=True busca globos negros."""
+    """Busca globos en las zonas lisas de paper_mask. dark_paper=True busca globos negros."""
     h, w, _ = rgb.shape
     total = h * w
+    min_area = 0.004 * total
     lum_img = rgb.mean(axis=2)
+    lines_img = lum_img > 170 if dark_paper else lum_img < 140
     paper_mask = ndimage.binary_opening(paper_mask, iterations=2)
     labels, _ = ndimage.label(paper_mask)
     bubbles = []
     for idx, sl in enumerate(ndimage.find_objects(labels), start=1):
         if sl is None:
+            continue
+        edges = (sl[0].start == 0) + (sl[1].start == 0) + (sl[0].stop == h) + (sl[1].stop == w)
+        if edges >= 2:                            # fondo pegado a esquinas
             continue
         # margen para poder mirar el contorno alrededor del globo
         y0, y1 = max(sl[0].start - 6, 0), min(sl[0].stop + 6, h)
@@ -165,49 +233,36 @@ def scan_bubbles(rgb, paper_mask, dark_paper):
         region = labels[y0:y1, x0:x1] == idx
         filled = ndimage.binary_fill_holes(region)
         area = int(filled.sum())
-        if area < 0.004 * total or area > 0.6 * total:
+        if area < min_area or area > 0.6 * total:
             continue
-        bh, bw = sl[0].stop - sl[0].start, sl[1].stop - sl[1].start
-        if area / float(bh * bw) < 0.5:          # forma demasiado irregular
-            continue
-        if region.sum() / float(area) < 0.55:     # demasiado "lleno" para ser un globo
-            continue
-        if solidity(filled, area) < 0.85:         # los globos son convexos (salvo la colita)
-            continue
-        lum = lum_img[y0:y1, x0:x1][region]
-        if lum.std() > 12:                        # el papel del globo es liso, sin sombreado
-            continue
-        edges = (sl[0].start == 0) + (sl[1].start == 0) + (sl[0].stop == h) + (sl[1].stop == w)
-        if edges >= 2:                            # fondo pegado a esquinas
-            continue
-        ring = ndimage.binary_dilation(filled, iterations=4) & ~filled
-        if ring.sum() == 0:
-            continue
-        ring_lum = lum_img[y0:y1, x0:x1][ring]
-        letters = count_letters(region, filled)
-        if dark_paper:
-            # globo negro: borde más claro y letras claras dentro (si no, es pelo, ropa, sombra...)
-            if ring_lum.mean() - np.median(lum) < 50 or letters < 4:
+        lum, lines = lum_img[y0:y1, x0:x1], lines_img[y0:y1, x0:x1]
+        m = bubble_metrics(region, filled, lum, lines)
+        candidates = [(region, filled, m, 0.6)]
+        if m["solidity"] < 0.85 and m["outline"] >= 0.6 and m["letters"] >= 4:
+            # buen contorno y letras pero forma rara: varios globos unidos
+            parts = split_joined(filled, min_area)
+            if parts:
+                candidates = [(region & pt, pt, bubble_metrics(region & pt, pt, lum, lines), 0.4) for pt in parts]
+        for reg, fil, mm, min_outline in candidates:
+            if not looks_like_bubble(mm, dark_paper, min_outline):
                 continue
-        elif (ring_lum < 110).mean() < 0.3:       # globo blanco sin contorno: nube, camisa, pared...
-            continue
-        ys, xs = np.nonzero(filled)
-        bubbles.append({
-            "offset": (x0, y0),
-            "filled": filled,
-            "white": region,
-            "area": area,
-            "center": (x0 + xs.mean(), y0 + ys.mean()),
-            "height": bh,
-            "paper": float(np.median(lum)),
-            "dark": dark_paper,
-            "letters": letters,
-        })
+            ys, xs = np.nonzero(fil)
+            bubbles.append({
+                "offset": (x0, y0),
+                "filled": fil,
+                "white": reg,
+                "area": mm["area"],
+                "center": (x0 + xs.mean(), y0 + ys.mean()),
+                "height": mm["height"],
+                "paper": mm["paper"],
+                "dark": dark_paper,
+                "letters": mm["letters"],
+            })
     return bubbles
 
 
 def find_bubbles(rgb, white_threshold):
-    """Globos blancos con contorno y, como respaldo, globos negros con letras dentro."""
+    """Globos blancos (con o sin contorno) y, como respaldo, globos negros con letras dentro."""
     mx = rgb.max(axis=2).astype(np.int16)
     mn = rgb.min(axis=2).astype(np.int16)
     flat = (mx - mn) <= 30
@@ -221,6 +276,24 @@ def find_bubbles(rgb, white_threshold):
     # primero los que ya traen letras (donde el modelo quiso poner el texto), luego por tamaño
     bubbles.sort(key=lambda b: (b["letters"] < 4, -b["area"]))
     return bubbles
+
+
+def split_across(text, bubbles):
+    """Reparte una frase entre varios globos, en proporción a su tamaño y sin cortar palabras."""
+    words = text.split()
+    if len(bubbles) <= 1 or len(words) < 2 * len(bubbles):
+        return [text]
+    total = float(sum(b["area"] for b in bubbles))
+    parts, i = [], 0
+    for n, b in enumerate(bubbles):
+        if n == len(bubbles) - 1:
+            take = len(words) - i
+        else:
+            take = max(1, round(len(words) * b["area"] / total))
+            take = min(take, len(words) - i - (len(bubbles) - n - 1))
+        parts.append(" ".join(words[i:i + take]))
+        i += take
+    return parts
 
 
 def reading_order(bubbles, img_h, order):
@@ -323,6 +396,16 @@ def text_color(setting, paper_lum):
     return color
 
 
+def erase_bubble(pil, rgb, bubble):
+    """Pinta el globo entero con el color de su papel (borra las letras de la IA)."""
+    ox, oy = bubble["offset"]
+    fh, fw = bubble["filled"].shape
+    paper = np.median(rgb[oy:oy + fh, ox:ox + fw][bubble["white"]], axis=0).astype(np.uint8)
+    crop = np.array(pil)[oy:oy + fh, ox:ox + fw]
+    crop[bubble["filled"]] = paper
+    pil.paste(Image.fromarray(crop), (ox, oy))
+
+
 def render_bubbles(image, cfg):
     b, h, w, _ = image.shape
     empty_mask = torch.zeros((b, h, w), dtype=torch.float32)
@@ -344,20 +427,29 @@ def render_bubbles(image, cfg):
         bubbles = find_bubbles(rgb, cfg["umbral_blanco"])
         if not bubbles:
             log.warning("[BubbleText] No se encontró ningún globo en la imagen %d.", i)
-        if len(bubbles) < len(texts):
-            log.warning("[BubbleText] Hay %d textos pero solo %d globos.", len(texts), len(bubbles))
-        chosen = reading_order(bubbles[:len(texts)], h, cfg["orden_lectura"])
+        lettered = [bb for bb in bubbles if bb["letters"] >= 4]
+        if len(texts) == 1 and len(lettered) > 1:
+            # el modelo repartió la frase en varios globos: la repartimos igual, en orden de lectura
+            chosen = reading_order(lettered[:4], h, cfg["orden_lectura"])
+            texts_i = split_across(texts[0], chosen)
+            chosen = chosen[:len(texts_i)]
+        else:
+            if len(bubbles) < len(texts):
+                log.warning("[BubbleText] Hay %d textos pero solo %d globos.", len(texts), len(bubbles))
+            chosen = reading_order(bubbles[:len(texts)], h, cfg["orden_lectura"])
+            texts_i = texts
+        # globos con letras de la IA que no reciben texto: se limpian para que no quede basura
+        leftover = [bb for bb in lettered if all(bb is not c for c in chosen)] if cfg["borrar_texto_ia"] else []
 
         pil = Image.fromarray(rgb)
+        for bubble in leftover:
+            erase_bubble(pil, rgb, bubble)
         draw = ImageDraw.Draw(pil)
-        for bubble, text in zip(chosen, texts):
+        for bubble, text in zip(chosen, texts_i):
             ox, oy = bubble["offset"]
             fh, fw = bubble["filled"].shape
             if cfg["borrar_texto_ia"]:
-                paper = np.median(rgb[oy:oy + fh, ox:ox + fw][bubble["white"]], axis=0).astype(np.uint8)
-                crop = np.array(pil)[oy:oy + fh, ox:ox + fw]
-                crop[bubble["filled"]] = paper
-                pil.paste(Image.fromarray(crop), (ox, oy))
+                erase_bubble(pil, rgb, bubble)
                 draw = ImageDraw.Draw(pil)
             fit = fit_text(bubble, text, font_path, cfg["tamano_maximo"], cfg["margen"])
             if fit is None:
