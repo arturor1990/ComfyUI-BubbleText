@@ -59,7 +59,7 @@ Usan Anima (`anima_baseV10.safetensors`, `qwen_3_06b_base.safetensors`, `qwen_im
 
 ```bash
 cd ComfyUI/custom_nodes
-git clone https://github.com/<tu-usuario>/ComfyUI-BubbleText.git
+git clone https://github.com/arturor1990/ComfyUI-BubbleText.git
 ```
 
 Reinicia ComfyUI. Las dependencias (`numpy`, `scipy`, `Pillow`, `fonttools`) ya vienen con casi cualquier instalación de ComfyUI; si falta alguna:
