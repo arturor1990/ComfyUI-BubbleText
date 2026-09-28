@@ -2,7 +2,7 @@
 
 [English](README.md) | **Español**
 
-Nodos para ComfyUI que ponen **texto limpio y legible dentro de los globos de diálogo** generados por modelos como Anima.
+Nodos para ComfyUI que ponen **texto limpio y legible dentro de los globos de diálogo** generados por modelos como Anima, Illustrious o NoobAI.
 
 Los modelos de imagen dibujan bien los globos, pero con frases largas se equivocan en las letras ("REALUNIATY", palabras repetidas…). Estos nodos dejan que el modelo dibuje el globo y después **borran lo que escribió la IA y escriben tu texto** con una fuente real, centrado y al tamaño máximo que quepa.
 
@@ -53,10 +53,19 @@ Los emojis compuestos (familias, tonos de piel, algunas banderas) salen por sepa
 
 En `example_workflows/` (también aparecen en **Plantillas → ComfyUI-BubbleText** dentro de ComfyUI):
 
-- **Anima - Globo de texto (basico)**: solo nodos de ComfyUI + estos nodos.
-- **Anima - Globo de texto (LoRA Manager)**: con `Lora Loader`, `TriggerWord Toggle` y `Save Image` de [ComfyUI-Lora-Manager](https://github.com/willmiao/ComfyUI-Lora-Manager). Las trigger words se ponen delante de tu prompt.
+| Workflow | Modelo | LoRA Manager |
+|---|---|---|
+| **Anima - Globo de texto (basico)** | Anima | No |
+| **Anima - Globo de texto (LoRA Manager)** | Anima | Sí |
+| **Illustrious - Globo de texto (basico)** | Illustrious / NoobAI | No |
+| **Illustrious - Globo de texto (LoRA Manager)** | Illustrious / NoobAI | Sí |
 
-Usan Anima (`anima_baseV10.safetensors`, `qwen_3_06b_base.safetensors`, `qwen_image_vae.safetensors`). Cambia los modelos por los tuyos.
+- **basico**: solo nodos de ComfyUI + estos nodos.
+- **LoRA Manager**: añade `Lora Loader`, `TriggerWord Toggle` y `Save Image` de [ComfyUI-Lora-Manager](https://github.com/willmiao/ComfyUI-Lora-Manager). Las trigger words se ponen delante de tu prompt.
+- **Anima**: `anima_baseV10.safetensors` + `qwen_3_06b_base.safetensors` + `qwen_image_vae.safetensors`, 30 pasos, CFG 4, `er_sde`. El nodo del globo usa `estilo_prompt` = `natural (Anima)`.
+- **Illustrious / NoobAI**: un checkpoint SDXL (`illustrijEVO_lvl2.safetensors`) con **CLIP Skip -2**, 30 pasos, CFG 5, `euler_ancestral`. El nodo del globo usa `estilo_prompt` = `tags (Illustrious / NoobAI)` y el negativo incluye `colored speech bubble`.
+
+Cambia los modelos por los tuyos; los workflows de Illustrious sirven con cualquier checkpoint Illustrious, NoobAI o Pony.
 
 ## Instalación
 

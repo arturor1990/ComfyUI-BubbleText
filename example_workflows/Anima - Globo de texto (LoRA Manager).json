@@ -1,5 +1,5 @@
 {
-  "id": "8578b0c4-ec5d-474b-b73d-64bc43f0c487",
+  "id": "b4f330e3-af29-4265-b3e0-3576c566a895",
   "revision": 0,
   "last_node_id": 16,
   "last_link_id": 19,
@@ -533,7 +533,7 @@
       "type": "SpeechBubblePrompt",
       "size": [
         460,
-        400
+        420
       ],
       "inputs": [
         {
@@ -631,6 +631,15 @@
             "name": "umbral_blanco"
           },
           "link": null
+        },
+        {
+          "localized_name": "estilo_prompt",
+          "name": "estilo_prompt",
+          "type": "COMBO",
+          "widget": {
+            "name": "estilo_prompt"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -664,7 +673,8 @@
         true,
         "auto",
         0.08,
-        195
+        195,
+        "natural (Anima)"
       ],
       "id": 9,
       "pos": [
@@ -719,7 +729,6 @@
           ]
         }
       ],
-      "title": "Prompt positivo (con globo)",
       "properties": {
         "Node name for S&R": "CLIPTextEncode",
         "cnr_id": "comfy-core",
@@ -727,7 +736,8 @@
       },
       "widgets_values": [
         ""
-      ]
+      ],
+      "title": "Prompt positivo (con globo)"
     },
     {
       "id": 11,
@@ -770,7 +780,6 @@
           ]
         }
       ],
-      "title": "Prompt negativo",
       "properties": {
         "Node name for S&R": "CLIPTextEncode",
         "cnr_id": "comfy-core",
@@ -778,7 +787,8 @@
       },
       "widgets_values": [
         "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia"
-      ]
+      ],
+      "title": "Prompt negativo"
     },
     {
       "id": 12,
@@ -975,7 +985,7 @@
       ],
       "outputs": [
         {
-          "localized_name": "IMAGE",
+          "localized_name": "IMAGEN",
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
@@ -992,7 +1002,6 @@
       "properties": {
         "Node name for S&R": "SpeechBubbleRender"
       },
-      "widgets_values": [],
       "title": "💬 Escribir en globo",
       "color": "#355",
       "bgcolor": "#244"
