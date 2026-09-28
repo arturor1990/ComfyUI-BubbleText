@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# fuentes propias: no se suben (pueden tener licencia)
+fonts/*.ttf
+fonts/*.otf
