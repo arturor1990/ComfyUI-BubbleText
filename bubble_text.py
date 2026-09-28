@@ -11,6 +11,7 @@ import logging
 import math
 import os
 import re
+import sys
 import textwrap
 from functools import lru_cache
 
@@ -363,6 +364,36 @@ def render_bubbles(image, cfg):
     return (torch.stack(out_images), torch.stack(out_masks))
 
 
+class _LoraManagerImageExtractor:
+    """Para LoRA Manager: que la receta use la imagen con el texto ya escrito.
+
+    LoRA Manager toma como imagen de la receta la salida del primer VAE Decode,
+    que todavía tiene las letras de la IA. Tras escribir el texto, la sustituimos.
+    """
+
+    images_key = "images"
+
+    @staticmethod
+    def extract(node_id, inputs, outputs, metadata):
+        pass
+
+    @classmethod
+    def update(cls, node_id, outputs, metadata):
+        images = metadata.setdefault(cls.images_key, {})
+        entry = {"node_id": node_id, "image": outputs}
+        images[node_id] = entry
+        images["first_decode"] = entry
+
+
+def register_with_lora_manager():
+    """Engancha los nodos que escriben texto al recolector de metadatos de LoRA Manager, si está instalado."""
+    for name, module in list(sys.modules.items()):
+        if name.endswith("metadata_collector.node_extractors") and hasattr(module, "NODE_EXTRACTORS"):
+            _LoraManagerImageExtractor.images_key = getattr(module, "IMAGES", "images")
+            for node_type in ("SpeechBubbleRender", "SpeechBubbleTextAuto"):
+                module.NODE_EXTRACTORS.setdefault(node_type, _LoraManagerImageExtractor)
+
+
 class SpeechBubblePrompt:
     """Como un LoRA para el prompt: si está activo añade el globo con el texto."""
 
@@ -397,6 +428,7 @@ class SpeechBubbleRender:
     CATEGORY = "image/text"
 
     def run(self, image, globo):
+        register_with_lora_manager()
         return render_bubbles(image, globo)
 
 
@@ -413,4 +445,5 @@ class SpeechBubbleText:
     CATEGORY = "image/text"
 
     def run(self, image, **cfg):
+        register_with_lora_manager()
         return render_bubbles(image, cfg)

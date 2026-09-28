@@ -76,3 +76,4 @@ pip install -r requirements.txt
 - Si usas un LoRA Turbo con **CFG 1**, el prompt negativo no tiene efecto, así que no sirve para evitar globos de colores.
 - Si el modelo parte la frase en dos globos, el texto completo va al globo principal.
 - Las recetas de LoRA Manager y los metadatos de la imagen guardan el prompt **con** la parte del globo ya inyectada. Si reutilizas ese prompt, quita esa parte o apaga el nodo; si no, se añade dos veces.
+- Con LoRA Manager instalado, **Save Recipe** usa la imagen con tu texto ya escrito (no la salida del VAE Decode con las letras de la IA).

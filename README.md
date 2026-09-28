@@ -78,3 +78,4 @@ pip install -r requirements.txt
 - With a Turbo LoRA at **CFG 1** the negative prompt has no effect, so it can't be used to avoid colored bubbles.
 - If the model splits the sentence into two bubbles, the full text goes into the main bubble.
 - LoRA Manager recipes and image metadata store the prompt **with** the injected bubble part. If you reuse that prompt, remove that part or turn the node off, otherwise it gets added twice.
+- With LoRA Manager installed, **Save Recipe** uses the image with your text already written (not the raw VAE Decode output with the AI's letters).
