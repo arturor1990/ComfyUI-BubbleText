@@ -42,6 +42,7 @@ Versión todo en uno que solo escribe sobre la imagen, sin tocar el prompt.
 | `color_texto` | `auto` (negro en globos claros, blanco en oscuros) o un color `#RRGGBB`. |
 | `margen` | Espacio entre el texto y el borde del globo. |
 | `umbral_blanco` | Qué tan blanco debe ser el globo. Bájalo si no detecta globos algo grises. |
+| `estilo_prompt` | (Solo en Globo de texto) `natural (Anima)` pide el globo con frases; `tags (Illustrious / NoobAI)` usa tags estilo Danbooru, que los modelos basados en SDXL siguen mejor. |
 
 ## Emojis
 

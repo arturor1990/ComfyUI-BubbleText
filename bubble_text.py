@@ -291,8 +291,18 @@ def settings_inputs():
     }
 
 
-def bubble_prompt(texts):
+STYLE_NATURAL = "natural (Anima)"
+STYLE_TAGS = "tags (Illustrious / NoobAI)"
+
+
+def bubble_prompt(texts, style=STYLE_NATURAL):
     """Fragmento de prompt: pide globos blancos con contorno negro, que es lo que mejor se detecta."""
+    if style == STYLE_TAGS:
+        # CLIP de SDXL entiende mejor tags que frases; el texto real lo escribe el nodo después
+        if len(texts) == 1:
+            return "speech bubble, (white speech bubble:1.2), black outline, english text, large speech bubble at the top"
+        return (f"speech bubbles, {len(texts)} speech bubbles, (white speech bubbles:1.2), black outline, "
+                "english text")
     if len(texts) == 1:
         return ("speech bubble, english text, a single large white speech bubble with a thick black outline "
                 f'and black text at the top of the image, the speech bubble says "{texts[0]}"')
@@ -399,7 +409,10 @@ class SpeechBubblePrompt:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"prompt": ("STRING", {"forceInput": True}), **settings_inputs()}}
+        # estilo_prompt va al final para no descolocar los valores de workflows ya guardados
+        return {"required": {"prompt": ("STRING", {"forceInput": True}), **settings_inputs(),
+                             "estilo_prompt": ([STYLE_NATURAL, STYLE_TAGS], {
+                                 "tooltip": "natural: frases (Anima). tags: estilo Danbooru (Illustrious, NoobAI, Pony)."})}}
 
     RETURN_TYPES = ("STRING", "BUBBLE_CONFIG")
     RETURN_NAMES = ("prompt", "globo")
@@ -411,7 +424,8 @@ class SpeechBubblePrompt:
         texts = [" ".join(EMOJI_CHARS.sub(" ", t).split()) for t in split_texts(cfg["texto"])]
         texts = [t for t in texts if t]
         if cfg["activado"] and texts:
-            prompt = f"{prompt.rstrip().rstrip(',')}, {bubble_prompt(texts)}"
+            style = cfg.get("estilo_prompt", STYLE_NATURAL)
+            prompt = f"{prompt.rstrip().rstrip(',')}, {bubble_prompt(texts, style)}"
         return (prompt, cfg)
 
 

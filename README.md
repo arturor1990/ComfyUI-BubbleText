@@ -44,6 +44,7 @@ The widget names are in Spanish; this is what each one does:
 | `color_texto` | `auto` (black on light bubbles, white on dark ones) or a `#RRGGBB` color. |
 | `margen` | Space between the text and the bubble edge. |
 | `umbral_blanco` | How white the bubble must be. Lower it if slightly gray bubbles aren't detected. |
+| `estilo_prompt` | (Globo de texto only) `natural (Anima)` asks for the bubble with full sentences; `tags (Illustrious / NoobAI)` uses Danbooru-style tags, which SDXL-based models follow better. |
 
 ## Emojis
 
