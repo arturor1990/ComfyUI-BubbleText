@@ -1,12 +1,12 @@
 {
-  "id": "b4f330e3-af29-4265-b3e0-3576c566a895",
+  "id": "c6992735-552e-4433-ba7d-d91ffa19888d",
   "revision": 0,
-  "last_node_id": 16,
-  "last_link_id": 19,
+  "last_node_id": 15,
+  "last_link_id": 20,
   "nodes": [
     {
       "id": 1,
-      "type": "UNETLoader",
+      "type": "CheckpointLoaderSimple",
       "pos": [
         0,
         0
@@ -20,20 +20,11 @@
       "mode": 0,
       "inputs": [
         {
-          "localized_name": "nombre_unet",
-          "name": "unet_name",
+          "localized_name": "nombre_ckpt",
+          "name": "ckpt_name",
           "type": "COMBO",
           "widget": {
-            "name": "unet_name"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "tipo_dato_peso",
-          "name": "weight_dtype",
-          "type": "COMBO",
-          "widget": {
-            "name": "weight_dtype"
+            "name": "ckpt_name"
           },
           "link": null
         }
@@ -43,61 +34,66 @@
           "localized_name": "MODELO",
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            2
+          ]
+        },
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 1,
           "links": [
             1
+          ]
+        },
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 2,
+          "links": [
+            16
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "UNETLoader",
+        "Node name for S&R": "CheckpointLoaderSimple",
         "cnr_id": "comfy-core",
-        "ver": "0.11.0"
+        "ver": "0.3.18"
       },
       "widgets_values": [
-        "anima_baseV10.safetensors",
-        "default"
+        "illustrijEVO_lvl2.safetensors"
       ]
     },
     {
       "id": 2,
-      "type": "CLIPLoader",
+      "type": "CLIPSetLastLayer",
       "pos": [
         0,
         170
       ],
       "size": [
         320,
-        130
+        70
       ],
       "flags": {},
       "order": 1,
       "mode": 0,
       "inputs": [
         {
-          "localized_name": "nombre_clip",
-          "name": "clip_name",
-          "type": "COMBO",
-          "widget": {
-            "name": "clip_name"
-          },
-          "link": null
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
         },
         {
-          "localized_name": "tipo",
-          "name": "type",
-          "type": "COMBO",
+          "localized_name": "detener_en_capa_clip",
+          "name": "stop_at_clip_layer",
+          "type": "INT",
           "widget": {
-            "name": "type"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "dispositivo",
-          "name": "device",
-          "shape": 7,
-          "type": "COMBO",
-          "widget": {
-            "name": "device"
+            "name": "stop_at_clip_layer"
           },
           "link": null
         }
@@ -107,82 +103,24 @@
           "localized_name": "CLIP",
           "name": "CLIP",
           "type": "CLIP",
+          "slot_index": 0,
           "links": [
-            2
+            3
           ]
         }
       ],
       "properties": {
-        "Node name for S&R": "CLIPLoader",
+        "Node name for S&R": "CLIPSetLastLayer",
         "cnr_id": "comfy-core",
-        "ver": "0.11.0",
-        "models": [
-          {
-            "name": "qwen_3_06b_base.safetensors",
-            "url": "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/text_encoders/qwen_3_06b_base.safetensors",
-            "directory": "text_encoders"
-          }
-        ]
+        "ver": "0.3.18"
       },
       "widgets_values": [
-        "qwen_3_06b_base.safetensors",
-        "stable_diffusion",
-        "default"
-      ]
+        -2
+      ],
+      "title": "CLIP Skip"
     },
     {
       "id": 3,
-      "type": "VAELoader",
-      "pos": [
-        0,
-        360
-      ],
-      "size": [
-        320,
-        80
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "nombre_vae",
-          "name": "vae_name",
-          "type": "COMBO",
-          "widget": {
-            "name": "vae_name"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "VAE",
-          "name": "VAE",
-          "type": "VAE",
-          "links": [
-            15
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAELoader",
-        "cnr_id": "comfy-core",
-        "ver": "0.3.40",
-        "models": [
-          {
-            "name": "qwen_image_vae.safetensors",
-            "url": "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/vae/qwen_image_vae.safetensors",
-            "directory": "vae"
-          }
-        ]
-      },
-      "widgets_values": [
-        "qwen_image_vae.safetensors"
-      ]
-    },
-    {
-      "id": 4,
       "type": "EmptyLatentImage",
       "pos": [
         0,
@@ -193,7 +131,7 @@
         130
       ],
       "flags": {},
-      "order": 3,
+      "order": 2,
       "mode": 0,
       "inputs": [
         {
@@ -230,7 +168,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            13
+            14
           ]
         }
       ],
@@ -246,7 +184,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": 4,
       "type": "Lora Loader (LoraManager)",
       "pos": [
         380,
@@ -257,14 +195,14 @@
         560
       ],
       "flags": {},
-      "order": 4,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 1
+          "link": 2
         },
         {
           "localized_name": "text",
@@ -288,7 +226,7 @@
           "name": "clip",
           "shape": 7,
           "type": "CLIP",
-          "link": 2
+          "link": 3
         },
         {
           "name": "lora_stack",
@@ -303,7 +241,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            10
+            11
           ]
         },
         {
@@ -311,8 +249,8 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            7,
-            9
+            8,
+            10
           ]
         },
         {
@@ -320,7 +258,7 @@
           "name": "trigger_words",
           "type": "STRING",
           "links": [
-            3
+            4
           ]
         },
         {
@@ -350,7 +288,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 5,
       "type": "TriggerWord Toggle (LoraManager)",
       "pos": [
         920,
@@ -361,7 +299,7 @@
         560
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
@@ -395,7 +333,7 @@
           "name": "trigger_words",
           "shape": 7,
           "type": "string",
-          "link": 3
+          "link": 4
         }
       ],
       "outputs": [
@@ -404,7 +342,7 @@
           "name": "filtered_trigger_words",
           "type": "STRING",
           "links": [
-            4
+            5
           ]
         }
       ],
@@ -444,7 +382,7 @@
           "name": "STRING",
           "type": "STRING",
           "links": [
-            5
+            6
           ]
         }
       ],
@@ -453,15 +391,15 @@
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        "masterpiece, best quality, score_7, safe, 1girl, anime girl with short brown hair and brown eyes, smiling, waving at the viewer, school uniform, outdoors, blue sky, cherry blossoms, upper body"
+        "masterpiece, best quality, amazing quality, 1girl, solo, short brown hair, brown eyes, smile, waving, looking at viewer, school uniform, outdoors, blue sky, cherry blossoms, upper body"
       ],
-      "id": 7,
+      "id": 6,
       "pos": [
         1260,
         0
       ],
       "flags": {},
-      "order": 6,
+      "order": 5,
       "mode": 0,
       "title": "Prompt"
     },
@@ -479,7 +417,7 @@
           "widget": {
             "name": "string_a"
           },
-          "link": 4
+          "link": 5
         },
         {
           "localized_name": "string_b",
@@ -488,7 +426,7 @@
           "widget": {
             "name": "string_b"
           },
-          "link": 5
+          "link": 6
         },
         {
           "localized_name": "delimiter",
@@ -506,7 +444,7 @@
           "name": "STRING",
           "type": "STRING",
           "links": [
-            6
+            7
           ]
         }
       ],
@@ -519,13 +457,13 @@
         "",
         ", "
       ],
-      "id": 8,
+      "id": 7,
       "pos": [
         1260,
         380
       ],
       "flags": {},
-      "order": 7,
+      "order": 6,
       "mode": 0,
       "title": "Trigger words + prompt"
     },
@@ -540,10 +478,10 @@
           "localized_name": "prompt",
           "name": "prompt",
           "type": "STRING",
-          "link": 6
+          "link": 7
         },
         {
-          "localized_name": "activado",
+          "localized_name": "enabled",
           "name": "activado",
           "type": "BOOLEAN",
           "widget": {
@@ -552,7 +490,7 @@
           "link": null
         },
         {
-          "localized_name": "texto",
+          "localized_name": "text",
           "name": "texto",
           "type": "STRING",
           "widget": {
@@ -561,7 +499,7 @@
           "link": null
         },
         {
-          "localized_name": "fuente",
+          "localized_name": "font",
           "name": "fuente",
           "type": "COMBO",
           "widget": {
@@ -570,7 +508,7 @@
           "link": null
         },
         {
-          "localized_name": "mayusculas",
+          "localized_name": "uppercase",
           "name": "mayusculas",
           "type": "BOOLEAN",
           "widget": {
@@ -579,7 +517,7 @@
           "link": null
         },
         {
-          "localized_name": "tamano_maximo",
+          "localized_name": "max font size",
           "name": "tamano_maximo",
           "type": "INT",
           "widget": {
@@ -588,7 +526,7 @@
           "link": null
         },
         {
-          "localized_name": "orden_lectura",
+          "localized_name": "reading order",
           "name": "orden_lectura",
           "type": "COMBO",
           "widget": {
@@ -597,7 +535,7 @@
           "link": null
         },
         {
-          "localized_name": "borrar_texto_ia",
+          "localized_name": "erase AI text",
           "name": "borrar_texto_ia",
           "type": "BOOLEAN",
           "widget": {
@@ -606,7 +544,7 @@
           "link": null
         },
         {
-          "localized_name": "color_texto",
+          "localized_name": "text color",
           "name": "color_texto",
           "type": "STRING",
           "widget": {
@@ -615,7 +553,7 @@
           "link": null
         },
         {
-          "localized_name": "margen",
+          "localized_name": "margin",
           "name": "margen",
           "type": "FLOAT",
           "widget": {
@@ -624,7 +562,7 @@
           "link": null
         },
         {
-          "localized_name": "umbral_blanco",
+          "localized_name": "white threshold",
           "name": "umbral_blanco",
           "type": "INT",
           "widget": {
@@ -633,7 +571,7 @@
           "link": null
         },
         {
-          "localized_name": "estilo_prompt",
+          "localized_name": "prompt style",
           "name": "estilo_prompt",
           "type": "COMBO",
           "widget": {
@@ -648,15 +586,15 @@
           "name": "prompt",
           "type": "STRING",
           "links": [
-            8
+            9
           ]
         },
         {
-          "localized_name": "globo",
-          "name": "globo",
+          "localized_name": "bubble",
+          "name": "bubble",
           "type": "BUBBLE_CONFIG",
           "links": [
-            17
+            18
           ]
         }
       ],
@@ -669,27 +607,27 @@
         "comicbd.ttf",
         true,
         64,
-        "izquierda → derecha",
+        "left → right",
         true,
         "auto",
         0.08,
         195,
-        "natural (Anima)"
+        "tags (Illustrious / NoobAI)"
       ],
-      "id": 9,
+      "id": 8,
       "pos": [
         1780,
         0
       ],
       "flags": {},
-      "order": 8,
+      "order": 7,
       "mode": 0,
-      "title": "💬 Globo de texto",
+      "title": "💬 Bubble Text · Prompt",
       "color": "#355",
       "bgcolor": "#244"
     },
     {
-      "id": 10,
+      "id": 9,
       "type": "CLIPTextEncode",
       "pos": [
         2280,
@@ -700,65 +638,14 @@
         90
       ],
       "flags": {},
-      "order": 9,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "clip",
           "name": "clip",
           "type": "CLIP",
-          "link": 7
-        },
-        {
-          "localized_name": "texto",
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
           "link": 8
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "ACONDICIONAMIENTO",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            11
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CLIPTextEncode",
-        "cnr_id": "comfy-core",
-        "ver": "0.3.65"
-      },
-      "widgets_values": [
-        ""
-      ],
-      "title": "Prompt positivo (con globo)"
-    },
-    {
-      "id": 11,
-      "type": "CLIPTextEncode",
-      "pos": [
-        2280,
-        150
-      ],
-      "size": [
-        400,
-        150
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": 9
         },
         {
           "localized_name": "texto",
@@ -767,7 +654,7 @@
           "widget": {
             "name": "text"
           },
-          "link": null
+          "link": 9
         }
       ],
       "outputs": [
@@ -786,12 +673,63 @@
         "ver": "0.3.65"
       },
       "widgets_values": [
-        "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, sepia"
+        ""
       ],
-      "title": "Prompt negativo"
+      "title": "Positive prompt (with bubble)"
     },
     {
-      "id": 12,
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [
+        2280,
+        150
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 10
+        },
+        {
+          "localized_name": "texto",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "ACONDICIONAMIENTO",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65"
+      },
+      "widgets_values": [
+        "worst quality, low quality, bad anatomy, bad hands, extra digits, jpeg artifacts, signature, watermark, colored speech bubble"
+      ],
+      "title": "Negative prompt"
+    },
+    {
+      "id": 11,
       "type": "KSampler",
       "pos": [
         2280,
@@ -802,32 +740,32 @@
         270
       ],
       "flags": {},
-      "order": 11,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "modelo",
           "name": "model",
           "type": "MODEL",
-          "link": 10
+          "link": 11
         },
         {
           "localized_name": "positivo",
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 11
+          "link": 12
         },
         {
           "localized_name": "negativo",
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 12
+          "link": 13
         },
         {
           "localized_name": "imagen_latente",
           "name": "latent_image",
           "type": "LATENT",
-          "link": 13
+          "link": 14
         },
         {
           "localized_name": "semilla",
@@ -891,7 +829,7 @@
           "type": "LATENT",
           "slot_index": 0,
           "links": [
-            14
+            15
           ]
         }
       ],
@@ -904,14 +842,14 @@
         0,
         "randomize",
         30,
-        4.0,
-        "er_sde",
-        "simple",
+        5.0,
+        "euler_ancestral",
+        "normal",
         1.0
       ]
     },
     {
-      "id": 13,
+      "id": 12,
       "type": "VAEDecode",
       "pos": [
         2740,
@@ -922,20 +860,20 @@
         50
       ],
       "flags": {},
-      "order": 12,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "muestras",
           "name": "samples",
           "type": "LATENT",
-          "link": 14
+          "link": 15
         },
         {
           "localized_name": "vae",
           "name": "vae",
           "type": "VAE",
-          "link": 15
+          "link": 16
         }
       ],
       "outputs": [
@@ -945,7 +883,7 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            16
+            17
           ]
         }
       ],
@@ -956,7 +894,7 @@
       }
     },
     {
-      "id": 14,
+      "id": 13,
       "type": "SpeechBubbleRender",
       "pos": [
         2740,
@@ -967,20 +905,20 @@
         70
       ],
       "flags": {},
-      "order": 13,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "image",
           "name": "image",
           "type": "IMAGE",
-          "link": 16
+          "link": 17
         },
         {
-          "localized_name": "globo",
+          "localized_name": "bubble",
           "name": "globo",
           "type": "BUBBLE_CONFIG",
-          "link": 17
+          "link": 18
         }
       ],
       "outputs": [
@@ -989,12 +927,12 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            18
+            19
           ]
         },
         {
-          "localized_name": "globos",
-          "name": "globos",
+          "localized_name": "bubble mask",
+          "name": "bubble mask",
           "type": "MASK",
           "links": []
         }
@@ -1002,12 +940,12 @@
       "properties": {
         "Node name for S&R": "SpeechBubbleRender"
       },
-      "title": "💬 Escribir en globo",
+      "title": "💬 Bubble Text · Write",
       "color": "#355",
       "bgcolor": "#244"
     },
     {
-      "id": 15,
+      "id": 14,
       "type": "Save Image (LoraManager)",
       "pos": [
         3100,
@@ -1018,14 +956,14 @@
         460
       ],
       "flags": {},
-      "order": 14,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 18
+          "link": 19
         },
         {
           "localized_name": "filename_prefix",
@@ -1142,7 +1080,7 @@
           "name": "images",
           "type": "IMAGE",
           "links": [
-            19
+            20
           ]
         }
       ],
@@ -1166,7 +1104,7 @@
       ]
     },
     {
-      "id": 16,
+      "id": 15,
       "type": "PreviewImage",
       "pos": [
         3520,
@@ -1177,14 +1115,14 @@
         780
       ],
       "flags": {},
-      "order": 15,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "imagenes",
           "name": "images",
           "type": "IMAGE",
-          "link": 19
+          "link": 20
         }
       ],
       "outputs": [
@@ -1207,125 +1145,149 @@
     [
       1,
       1,
+      1,
+      2,
       0,
-      5,
+      "CLIP"
+    ],
+    [
+      2,
+      1,
+      0,
+      4,
       0,
       "MODEL"
     ],
     [
-      2,
+      3,
       2,
       0,
-      5,
+      4,
       3,
       "CLIP"
-    ],
-    [
-      3,
-      5,
-      2,
-      6,
-      3,
-      "STRING"
     ],
     [
       4,
-      6,
-      0,
-      8,
-      0,
+      4,
+      2,
+      5,
+      3,
       "STRING"
     ],
     [
       5,
+      5,
+      0,
       7,
       0,
-      8,
+      "STRING"
+    ],
+    [
+      6,
+      6,
+      0,
+      7,
       1,
       "STRING"
     ],
     [
-      6,
-      8,
+      7,
+      7,
       0,
-      9,
+      8,
       0,
       "STRING"
     ],
     [
-      7,
-      5,
+      8,
+      4,
+      1,
+      9,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      8,
+      0,
+      9,
+      1,
+      "STRING"
+    ],
+    [
+      10,
+      4,
       1,
       10,
       0,
       "CLIP"
     ],
     [
-      8,
-      9,
-      0,
-      10,
-      1,
-      "STRING"
-    ],
-    [
-      9,
-      5,
-      1,
       11,
+      4,
       0,
-      "CLIP"
-    ],
-    [
-      10,
-      5,
-      0,
-      12,
+      11,
       0,
       "MODEL"
     ],
     [
-      11,
-      10,
-      0,
       12,
+      9,
+      0,
+      11,
       1,
-      "CONDITIONING"
-    ],
-    [
-      12,
-      11,
-      0,
-      12,
-      2,
       "CONDITIONING"
     ],
     [
       13,
-      4,
+      10,
       0,
-      12,
-      3,
-      "LATENT"
+      11,
+      2,
+      "CONDITIONING"
     ],
     [
       14,
-      12,
+      3,
       0,
-      13,
-      0,
+      11,
+      3,
       "LATENT"
     ],
     [
       15,
-      3,
+      11,
       0,
-      13,
+      12,
+      0,
+      "LATENT"
+    ],
+    [
+      16,
+      1,
+      2,
+      12,
       1,
       "VAE"
     ],
     [
-      16,
+      17,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      18,
+      8,
+      1,
+      13,
+      1,
+      "BUBBLE_CONFIG"
+    ],
+    [
+      19,
       13,
       0,
       14,
@@ -1333,26 +1295,10 @@
       "IMAGE"
     ],
     [
-      17,
-      9,
-      1,
-      14,
-      1,
-      "BUBBLE_CONFIG"
-    ],
-    [
-      18,
+      20,
       14,
       0,
       15,
-      0,
-      "IMAGE"
-    ],
-    [
-      19,
-      15,
-      0,
-      16,
       0,
       "IMAGE"
     ]
@@ -1360,7 +1306,7 @@
   "groups": [
     {
       "id": 1,
-      "title": "Modelo",
+      "title": "Model",
       "bounding": [
         -20,
         -80,
@@ -1396,7 +1342,7 @@
     },
     {
       "id": 4,
-      "title": "Salida",
+      "title": "Output",
       "bounding": [
         3080,
         -80,
@@ -1408,7 +1354,7 @@
     },
     {
       "id": 5,
-      "title": "Globo + sampler",
+      "title": "Bubble + sampler",
       "bounding": [
         1760,
         -80,

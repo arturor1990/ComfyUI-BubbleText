@@ -18,16 +18,16 @@ Prompt: `masterpiece, best quality, amazing quality, 1girl, solo, short brown ha
 
 ## Nodes
 
-### 💬 Globo de texto (`SpeechBubblePrompt`)
+### 💬 Bubble Text · Prompt (`SpeechBubblePrompt`)
 Works like a LoRA for your prompt: place it between your prompt and `CLIP Text Encode`.
 
 - With **ON** and some text, it appends the bubble request to the prompt:
   `speech bubble, english text, a single large white speech bubble with a thick black outline and black text at the top of the image, the speech bubble says "your text"`
 - With **OFF** or empty text, the prompt passes through unchanged.
-- Outputs the modified prompt plus a `globo` config that goes into **Escribir en globo**.
+- Outputs the modified prompt plus a `bubble` config that goes into **Bubble Text · Write**.
 
-### 💬 Escribir en globo (`SpeechBubbleRender`)
-Place it between `VAE Decode` and your save node. It has no settings: it uses the config from **Globo de texto**.
+### 💬 Bubble Text · Write (`SpeechBubbleRender`)
+Place it between `VAE Decode` and your save node. It has no settings: it uses the config from **Bubble Text · Prompt**.
 
 1. Finds the bubbles: white ones with an outline (thin outlines too), white ones without an outline if they have letters inside, and, as a fallback, black bubbles with letters inside. Bubbles joined together (e.g. two bubbles connected by the tail) are split apart.
 2. Erases the letters the model made up.
@@ -35,26 +35,25 @@ Place it between `VAE Decode` and your save node. It has no settings: it uses th
 
 If no bubble is found, the image is left untouched.
 
-### 💬 Texto en globo (auto) (`SpeechBubbleTextAuto`)
+### 💬 Bubble Text (all-in-one) (`SpeechBubbleTextAuto`)
 All-in-one version that only writes on the image, without touching the prompt.
 
 ## Options
 
-The widget names are in Spanish; this is what each one does:
 
 | Option | What it does |
 |---|---|
-| `activado` | ON/OFF. When off, neither the prompt nor the image is changed. |
-| `texto` | The bubble text. **A blank line** separates texts for several bubbles (in reading order). Emojis supported 😄 |
-| `fuente` | Windows comic-style fonts (Comic Sans, Impact, Arial Black…) plus any `.ttf`/`.otf` you drop into the `fonts/` folder. |
-| `mayusculas` | Uppercase everything, comic style. |
-| `tamano_maximo` | Maximum font size. The node uses the largest size that fits. |
-| `orden_lectura` | Left → right, or right → left (manga). |
-| `borrar_texto_ia` | Erase the model's letters before writing. |
-| `color_texto` | `auto` (black on light bubbles, white on dark ones) or a `#RRGGBB` color. |
-| `margen` | Space between the text and the bubble edge. |
-| `umbral_blanco` | How white the bubble must be. Lower it if slightly gray bubbles aren't detected. |
-| `estilo_prompt` | (Globo de texto only) `natural (Anima)` asks for the bubble with full sentences; `tags (Illustrious / NoobAI)` uses Danbooru-style tags, which SDXL-based models follow better. |
+| `enabled` | ON/OFF. When off, neither the prompt nor the image is changed. |
+| `text` | The bubble text. **A blank line** separates texts for several bubbles (in reading order). Emojis supported 😄 |
+| `font` | Windows comic-style fonts (Comic Sans, Impact, Arial Black…) plus any `.ttf`/`.otf` you drop into the `fonts/` folder. |
+| `uppercase` | Uppercase everything, comic style. |
+| `max font size` | Maximum font size. The node uses the largest size that fits. |
+| `reading order` | Left → right, or right → left (manga). |
+| `erase AI text` | Erase the model's letters before writing. |
+| `text color` | `auto` (black on light bubbles, white on dark ones) or a `#RRGGBB` color. |
+| `margin` | Space between the text and the bubble edge. |
+| `white threshold` | How white the bubble must be. Lower it if slightly gray bubbles aren't detected. |
+| `prompt style` | (Bubble Text · Prompt only) `natural (Anima)` asks for the bubble with full sentences; `tags (Illustrious / NoobAI)` uses Danbooru-style tags, which SDXL-based models follow better. |
 
 ## Emojis
 
@@ -67,15 +66,15 @@ In `example_workflows/` (they also show up under **Templates → ComfyUI-BubbleT
 
 | Workflow | Model | LoRA Manager |
 |---|---|---|
-| **Anima - Globo de texto (basico)** | Anima | No |
-| **Anima - Globo de texto (LoRA Manager)** | Anima | Yes |
-| **Illustrious - Globo de texto (basico)** | Illustrious / NoobAI | No |
-| **Illustrious - Globo de texto (LoRA Manager)** | Illustrious / NoobAI | Yes |
+| **Anima - Bubble Text (basic)** | Anima | No |
+| **Anima - Bubble Text (LoRA Manager)** | Anima | Yes |
+| **Illustrious - Bubble Text (basic)** | Illustrious / NoobAI | No |
+| **Illustrious - Bubble Text (LoRA Manager)** | Illustrious / NoobAI | Yes |
 
-- **basico**: core ComfyUI nodes + these nodes only.
+- **basic**: core ComfyUI nodes + these nodes only.
 - **LoRA Manager**: adds `Lora Loader`, `TriggerWord Toggle` and `Save Image` from [ComfyUI-Lora-Manager](https://github.com/willmiao/ComfyUI-Lora-Manager). Trigger words go in front of your prompt.
-- **Anima**: `anima_baseV10.safetensors` + `qwen_3_06b_base.safetensors` + `qwen_image_vae.safetensors`, 30 steps, CFG 4, `er_sde`. The bubble node uses `estilo_prompt` = `natural (Anima)`.
-- **Illustrious / NoobAI**: an SDXL checkpoint (`illustrijEVO_lvl2.safetensors`) with **CLIP Skip -2**, 30 steps, CFG 5, `euler_ancestral`. The bubble node uses `estilo_prompt` = `tags (Illustrious / NoobAI)`, and the negative prompt includes `colored speech bubble`.
+- **Anima**: `anima_baseV10.safetensors` + `qwen_3_06b_base.safetensors` + `qwen_image_vae.safetensors`, 30 steps, CFG 4, `er_sde`. The bubble node uses `prompt style` = `natural (Anima)`.
+- **Illustrious / NoobAI**: an SDXL checkpoint (`illustrijEVO_lvl2.safetensors`) with **CLIP Skip -2**, 30 steps, CFG 5, `euler_ancestral`. The bubble node uses `prompt style` = `tags (Illustrious / NoobAI)`, and the negative prompt includes `colored speech bubble`.
 
 Swap in your own models; any Illustrious, NoobAI or Pony checkpoint works with the Illustrious workflows.
 

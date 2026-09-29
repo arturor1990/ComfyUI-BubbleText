@@ -18,16 +18,16 @@ Prompt: `masterpiece, best quality, amazing quality, 1girl, solo, short brown ha
 
 ## Nodos
 
-### 💬 Globo de texto (`SpeechBubblePrompt`)
+### 💬 Bubble Text · Prompt (`SpeechBubblePrompt`)
 Funciona como un LoRA para el prompt: va entre tu prompt y el `CLIP Text Encode`.
 
 - Con **ON** y un texto escrito, añade al final del prompt la petición del globo:
   `speech bubble, english text, a single large white speech bubble with a thick black outline and black text at the top of the image, the speech bubble says "tu texto"`
 - Con **OFF** o el texto vacío, deja el prompt igual.
-- Sale el prompt modificado y una configuración `globo` que se conecta a **Escribir en globo**.
+- Sale el prompt modificado y una configuración `bubble` que se conecta a **Bubble Text · Write**.
 
-### 💬 Escribir en globo (`SpeechBubbleRender`)
-Va entre `VAE Decode` y el nodo de guardar. No tiene controles: usa la configuración de **Globo de texto**.
+### 💬 Bubble Text · Write (`SpeechBubbleRender`)
+Va entre `VAE Decode` y el nodo de guardar. No tiene controles: usa la configuración de **Bubble Text · Prompt**.
 
 1. Busca los globos: blancos con contorno (también fino), blancos sin contorno si tienen letras dentro y, como respaldo, globos negros con letras dentro. Si hay globos unidos (por ejemplo, dos conectados por la colita), los separa.
 2. Borra las letras inventadas por el modelo.
@@ -35,24 +35,24 @@ Va entre `VAE Decode` y el nodo de guardar. No tiene controles: usa la configura
 
 Si no encuentra ningún globo, deja la imagen tal cual.
 
-### 💬 Texto en globo (auto) (`SpeechBubbleTextAuto`)
+### 💬 Bubble Text (all-in-one) (`SpeechBubbleTextAuto`)
 Versión todo en uno que solo escribe sobre la imagen, sin tocar el prompt.
 
 ## Opciones
 
 | Opción | Qué hace |
 |---|---|
-| `activado` | ON/OFF. Apagado, no toca ni el prompt ni la imagen. |
-| `texto` | Lo que va en el globo. **Una línea en blanco** separa textos para varios globos (en orden de lectura). Acepta emojis 😄 |
-| `fuente` | Fuentes de cómic de Windows (Comic Sans, Impact, Arial Black…) y cualquier `.ttf`/`.otf` que pongas en la carpeta `fonts/`. |
-| `mayusculas` | Escribe todo en mayúsculas, como en los cómics. |
-| `tamano_maximo` | Tamaño máximo de letra. El nodo usa el mayor que quepa. |
-| `orden_lectura` | Izquierda → derecha, o derecha → izquierda (manga). |
-| `borrar_texto_ia` | Borra las letras que dibujó el modelo antes de escribir. |
-| `color_texto` | `auto` (negro en globos claros, blanco en oscuros) o un color `#RRGGBB`. |
-| `margen` | Espacio entre el texto y el borde del globo. |
-| `umbral_blanco` | Qué tan blanco debe ser el globo. Bájalo si no detecta globos algo grises. |
-| `estilo_prompt` | (Solo en Globo de texto) `natural (Anima)` pide el globo con frases; `tags (Illustrious / NoobAI)` usa tags estilo Danbooru, que los modelos basados en SDXL siguen mejor. |
+| `enabled` | ON/OFF. Apagado, no toca ni el prompt ni la imagen. |
+| `text` | Lo que va en el globo. **Una línea en blanco** separa textos para varios globos (en orden de lectura). Acepta emojis 😄 |
+| `font` | Fuentes de cómic de Windows (Comic Sans, Impact, Arial Black…) y cualquier `.ttf`/`.otf` que pongas en la carpeta `fonts/`. |
+| `uppercase` | Escribe todo en mayúsculas, como en los cómics. |
+| `max font size` | Tamaño máximo de letra. El nodo usa el mayor que quepa. |
+| `reading order` | Izquierda → derecha, o derecha → izquierda (manga). |
+| `erase AI text` | Borra las letras que dibujó el modelo antes de escribir. |
+| `text color` | `auto` (negro en globos claros, blanco en oscuros) o un color `#RRGGBB`. |
+| `margin` | Espacio entre el texto y el borde del globo. |
+| `white threshold` | Qué tan blanco debe ser el globo. Bájalo si no detecta globos algo grises. |
+| `prompt style` | (Solo en Bubble Text · Prompt) `natural (Anima)` pide el globo con frases; `tags (Illustrious / NoobAI)` usa tags estilo Danbooru, que los modelos basados en SDXL siguen mejor. |
 
 ## Emojis
 
@@ -65,15 +65,15 @@ En `example_workflows/` (también aparecen en **Plantillas → ComfyUI-BubbleTex
 
 | Workflow | Modelo | LoRA Manager |
 |---|---|---|
-| **Anima - Globo de texto (basico)** | Anima | No |
-| **Anima - Globo de texto (LoRA Manager)** | Anima | Sí |
-| **Illustrious - Globo de texto (basico)** | Illustrious / NoobAI | No |
-| **Illustrious - Globo de texto (LoRA Manager)** | Illustrious / NoobAI | Sí |
+| **Anima - Bubble Text (basic)** | Anima | No |
+| **Anima - Bubble Text (LoRA Manager)** | Anima | Sí |
+| **Illustrious - Bubble Text (basic)** | Illustrious / NoobAI | No |
+| **Illustrious - Bubble Text (LoRA Manager)** | Illustrious / NoobAI | Sí |
 
-- **basico**: solo nodos de ComfyUI + estos nodos.
+- **basic**: solo nodos de ComfyUI + estos nodos.
 - **LoRA Manager**: añade `Lora Loader`, `TriggerWord Toggle` y `Save Image` de [ComfyUI-Lora-Manager](https://github.com/willmiao/ComfyUI-Lora-Manager). Las trigger words se ponen delante de tu prompt.
-- **Anima**: `anima_baseV10.safetensors` + `qwen_3_06b_base.safetensors` + `qwen_image_vae.safetensors`, 30 pasos, CFG 4, `er_sde`. El nodo del globo usa `estilo_prompt` = `natural (Anima)`.
-- **Illustrious / NoobAI**: un checkpoint SDXL (`illustrijEVO_lvl2.safetensors`) con **CLIP Skip -2**, 30 pasos, CFG 5, `euler_ancestral`. El nodo del globo usa `estilo_prompt` = `tags (Illustrious / NoobAI)` y el negativo incluye `colored speech bubble`.
+- **Anima**: `anima_baseV10.safetensors` + `qwen_3_06b_base.safetensors` + `qwen_image_vae.safetensors`, 30 pasos, CFG 4, `er_sde`. El nodo del globo usa `prompt style` = `natural (Anima)`.
+- **Illustrious / NoobAI**: un checkpoint SDXL (`illustrijEVO_lvl2.safetensors`) con **CLIP Skip -2**, 30 pasos, CFG 5, `euler_ancestral`. El nodo del globo usa `prompt style` = `tags (Illustrious / NoobAI)` y el negativo incluye `colored speech bubble`.
 
 Cambia los modelos por los tuyos; los workflows de Illustrious sirven con cualquier checkpoint Illustrious, NoobAI o Pony.
 

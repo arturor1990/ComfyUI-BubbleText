@@ -40,8 +40,10 @@ FALLBACK_FONTS = [os.path.join(WIN_FONT_DIR, f) for f in ("seguiemj.ttf", "segui
 EMOJI_JOINERS = re.compile("[︎️‍🏻-🏿]")
 EMOJI_CHARS = re.compile("[☀-➿⬀-⯿🀀-🫿︎️‍]")
 
-READING_LTR = "izquierda → derecha"
-READING_RTL = "derecha → izquierda (manga)"
+READING_LTR = "left → right"
+READING_RTL = "right → left (manga)"
+# valores de versiones anteriores, para que los workflows ya guardados sigan funcionando
+LEGACY_READING = {"izquierda → derecha": READING_LTR, "derecha → izquierda (manga)": READING_RTL}
 
 
 def available_fonts():
@@ -297,6 +299,7 @@ def split_across(text, bubbles):
 
 
 def reading_order(bubbles, img_h, order):
+    order = LEGACY_READING.get(order, order)
     band = max(img_h * 0.12, 1)
     sign = -1 if order == READING_RTL else 1
     return sorted(bubbles, key=lambda b: (round(b["center"][1] / band), sign * b["center"][0]))
@@ -345,23 +348,33 @@ def fit_text(bubble, text, font_path, max_size, padding):
 
 
 def settings_inputs():
-    fonts = list(available_fonts().keys()) or ["(sin fuentes)"]
+    # los nombres internos (activado, texto…) no cambian: los workflows guardados dependen de ellos.
+    # Lo que se ve en pantalla es display_name.
+    fonts = list(available_fonts().keys()) or ["(no fonts)"]
     return {
-        "activado": ("BOOLEAN", {"default": True, "label_on": "ON", "label_off": "OFF"}),
-        "texto": ("STRING", {"multiline": True, "default": "",
-                             "placeholder": "Texto del globo.\n\nDeja una línea en blanco para pasar al siguiente globo."}),
-        "fuente": (fonts, {"default": fonts[0]}),
-        "mayusculas": ("BOOLEAN", {"default": True}),
-        "tamano_maximo": ("INT", {"default": 64, "min": 10, "max": 300, "step": 2}),
-        "orden_lectura": ([READING_LTR, READING_RTL],),
-        "borrar_texto_ia": ("BOOLEAN", {"default": True, "tooltip": "Borra las letras inventadas por el modelo dentro del globo antes de escribir."}),
-        "color_texto": ("STRING", {"default": "auto",
-                                   "tooltip": "auto = negro en globos claros y blanco en globos oscuros. También acepta #RRGGBB."}),
-        "margen": ("FLOAT", {"default": 0.08, "min": 0.0, "max": 0.4, "step": 0.01,
-                             "tooltip": "Espacio libre entre el texto y el borde del globo."}),
-        "umbral_blanco": ("INT", {"default": 195, "min": 150, "max": 254,
-                                  "tooltip": "Qué tan blanco debe ser el globo. Bájalo si no detecta globos algo grises."}),
+        "activado": ("BOOLEAN", {"default": True, "label_on": "ON", "label_off": "OFF", "display_name": "enabled"}),
+        "texto": ("STRING", {"multiline": True, "default": "", "display_name": "text",
+                             "placeholder": "Bubble text.\n\nLeave a blank line to move on to the next bubble."}),
+        "fuente": (fonts, {"default": fonts[0], "display_name": "font"}),
+        "mayusculas": ("BOOLEAN", {"default": True, "display_name": "uppercase"}),
+        "tamano_maximo": ("INT", {"default": 64, "min": 10, "max": 300, "step": 2, "display_name": "max font size",
+                                  "tooltip": "The node uses the largest size that fits, up to this one."}),
+        "orden_lectura": ([READING_LTR, READING_RTL], {"display_name": "reading order"}),
+        "borrar_texto_ia": ("BOOLEAN", {"default": True, "display_name": "erase AI text",
+                                        "tooltip": "Erase the letters the model made up inside the bubble before writing."}),
+        "color_texto": ("STRING", {"default": "auto", "display_name": "text color",
+                                   "tooltip": "auto = black on light bubbles, white on dark ones. Also accepts #RRGGBB."}),
+        "margen": ("FLOAT", {"default": 0.08, "min": 0.0, "max": 0.4, "step": 0.01, "display_name": "margin",
+                             "tooltip": "Free space between the text and the bubble edge."}),
+        "umbral_blanco": ("INT", {"default": 195, "min": 150, "max": 254, "display_name": "white threshold",
+                                  "tooltip": "How white the bubble must be. Lower it if slightly gray bubbles aren't detected."}),
     }
+
+
+def validate_reading_order(orden_lectura):
+    if orden_lectura in (READING_LTR, READING_RTL) or orden_lectura in LEGACY_READING:
+        return True
+    return f"Invalid reading order: {orden_lectura}"
 
 
 STYLE_NATURAL = "natural (Anima)"
@@ -414,7 +427,7 @@ def render_bubbles(image, cfg):
         return (image, empty_mask)
     font_path = available_fonts().get(cfg["fuente"])
     if not font_path:
-        log.warning("[BubbleText] Fuente no encontrada: %s", cfg["fuente"])
+        log.warning("[BubbleText] Font not found: %s", cfg["fuente"])
         return (image, empty_mask)
     texts = [EMOJI_JOINERS.sub("", t) for t in texts]
     if cfg["mayusculas"]:
@@ -426,7 +439,7 @@ def render_bubbles(image, cfg):
         mask = np.zeros((h, w), dtype=np.float32)
         bubbles = find_bubbles(rgb, cfg["umbral_blanco"])
         if not bubbles:
-            log.warning("[BubbleText] No se encontró ningún globo en la imagen %d.", i)
+            log.warning("[BubbleText] No speech bubble found in image %d.", i)
         lettered = [bb for bb in bubbles if bb["letters"] >= 4]
         if len(texts) == 1 and len(lettered) > 1:
             # el modelo repartió la frase en varios globos: la repartimos igual, en orden de lectura
@@ -435,7 +448,7 @@ def render_bubbles(image, cfg):
             chosen = chosen[:len(texts_i)]
         else:
             if len(bubbles) < len(texts):
-                log.warning("[BubbleText] Hay %d textos pero solo %d globos.", len(texts), len(bubbles))
+                log.warning("[BubbleText] %d texts but only %d bubbles.", len(texts), len(bubbles))
             chosen = reading_order(bubbles[:len(texts)], h, cfg["orden_lectura"])
             texts_i = texts
         # globos con letras de la IA que no reciben texto: se limpian para que no quede basura
@@ -453,7 +466,7 @@ def render_bubbles(image, cfg):
                 draw = ImageDraw.Draw(pil)
             fit = fit_text(bubble, text, font_path, cfg["tamano_maximo"], cfg["margen"])
             if fit is None:
-                log.warning("[BubbleText] El texto no cabe en el globo: %r", text)
+                log.warning("[BubbleText] Text doesn't fit in the bubble: %r", text)
                 continue
             font, lines, (cx, top), step = fit
             color = text_color(cfg["color_texto"], bubble["paper"])
@@ -504,12 +517,19 @@ class SpeechBubblePrompt:
         # estilo_prompt va al final para no descolocar los valores de workflows ya guardados
         return {"required": {"prompt": ("STRING", {"forceInput": True}), **settings_inputs(),
                              "estilo_prompt": ([STYLE_NATURAL, STYLE_TAGS], {
-                                 "tooltip": "natural: frases (Anima). tags: estilo Danbooru (Illustrious, NoobAI, Pony)."})}}
+                                 "display_name": "prompt style",
+                                 "tooltip": "natural: full sentences (Anima). tags: Danbooru style (Illustrious, NoobAI, Pony)."})}}
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, orden_lectura):
+        return validate_reading_order(orden_lectura)
 
     RETURN_TYPES = ("STRING", "BUBBLE_CONFIG")
-    RETURN_NAMES = ("prompt", "globo")
+    RETURN_NAMES = ("prompt", "bubble")
     FUNCTION = "run"
     CATEGORY = "image/text"
+    DESCRIPTION = ("Works like a LoRA for your prompt: when enabled, it asks the model for a clean white speech bubble. "
+                   "Connect 'bubble' to 💬 Bubble Text · Write.")
 
     def run(self, prompt, **cfg):
         # los emojis no van al prompt: el modelo los dibuja mal y el T5 no los conoce
@@ -526,12 +546,13 @@ class SpeechBubbleRender:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"image": ("IMAGE",), "globo": ("BUBBLE_CONFIG",)}}
+        return {"required": {"image": ("IMAGE",), "globo": ("BUBBLE_CONFIG", {"display_name": "bubble"})}}
 
     RETURN_TYPES = ("IMAGE", "MASK")
-    RETURN_NAMES = ("IMAGE", "globos")
+    RETURN_NAMES = ("IMAGE", "bubble mask")
     FUNCTION = "run"
     CATEGORY = "image/text"
+    DESCRIPTION = "Finds the speech bubbles, erases the AI's letters and writes your text with a real font."
 
     def run(self, image, globo):
         register_with_lora_manager()
@@ -545,10 +566,15 @@ class SpeechBubbleText:
     def INPUT_TYPES(cls):
         return {"required": {"image": ("IMAGE",), **settings_inputs()}}
 
+    @classmethod
+    def VALIDATE_INPUTS(cls, orden_lectura):
+        return validate_reading_order(orden_lectura)
+
     RETURN_TYPES = ("IMAGE", "MASK")
-    RETURN_NAMES = ("IMAGE", "globos")
+    RETURN_NAMES = ("IMAGE", "bubble mask")
     FUNCTION = "run"
     CATEGORY = "image/text"
+    DESCRIPTION = "All-in-one: writes your text in the speech bubbles without touching the prompt."
 
     def run(self, image, **cfg):
         register_with_lora_manager()
