@@ -6,6 +6,16 @@ ComfyUI nodes that put **clean, readable text inside speech bubbles** generated 
 
 Image models draw speech bubbles well, but with long sentences they misspell words ("REALUNIATY", repeated words…). These nodes let the model draw the bubble, then **erase the AI's text and write yours** with a real font, centered and at the largest size that fits.
 
+## Before / after
+
+Same seed and settings (Illustrious checkpoint `molKeunMix_deepcobaltV2`, 30 steps, CFG 5, `euler_ancestral`), text: `Hi! Want to see something cool? 😄`
+
+| Without BubbleText (the model writes the text) | With BubbleText |
+|:---:|:---:|
+| <img src="images/illustrious_sin_nodo.webp" width="380"> | <img src="images/illustrious_con_nodo.webp" width="380"> |
+
+Prompt: `masterpiece, best quality, amazing quality, 1girl, solo, short brown hair, brown eyes, smile, waving, looking at viewer, school uniform, outdoors, blue sky, cherry blossoms, upper body`
+
 ## Nodes
 
 ### 💬 Globo de texto (`SpeechBubblePrompt`)

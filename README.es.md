@@ -6,6 +6,16 @@ Nodos para ComfyUI que ponen **texto limpio y legible dentro de los globos de di
 
 Los modelos de imagen dibujan bien los globos, pero con frases largas se equivocan en las letras ("REALUNIATY", palabras repetidas…). Estos nodos dejan que el modelo dibuje el globo y después **borran lo que escribió la IA y escriben tu texto** con una fuente real, centrado y al tamaño máximo que quepa.
 
+## Antes / después
+
+Misma seed y ajustes (checkpoint Illustrious `molKeunMix_deepcobaltV2`, 30 pasos, CFG 5, `euler_ancestral`), texto: `Hi! Want to see something cool? 😄`
+
+| Sin BubbleText (el modelo escribe el texto) | Con BubbleText |
+|:---:|:---:|
+| <img src="images/illustrious_sin_nodo.webp" width="380"> | <img src="images/illustrious_con_nodo.webp" width="380"> |
+
+Prompt: `masterpiece, best quality, amazing quality, 1girl, solo, short brown hair, brown eyes, smile, waving, looking at viewer, school uniform, outdoors, blue sky, cherry blossoms, upper body`
+
 ## Nodos
 
 ### 💬 Globo de texto (`SpeechBubblePrompt`)
