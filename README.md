@@ -54,6 +54,7 @@ All-in-one version that only writes on the image, without touching the prompt.
 | `margin` | Space between the text and the bubble edge. |
 | `white threshold` | How white the bubble must be. Lower it if slightly gray bubbles aren't detected. |
 | `prompt style` | (Bubble Text · Prompt only) `natural (Anima)` asks for the bubble with full sentences; `tags (Illustrious / NoobAI)` uses Danbooru-style tags, which SDXL-based models follow better. |
+| `bubble size` | (Bubble Text · Prompt only) `small`, `medium` (default) or `large`. Avoid `large` with Anima: it sometimes turns the whole image into a giant bubble. |
 
 ## Emojis
 

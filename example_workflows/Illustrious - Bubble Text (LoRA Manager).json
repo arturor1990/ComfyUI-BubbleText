@@ -471,7 +471,7 @@
       "type": "SpeechBubblePrompt",
       "size": [
         460,
-        420
+        440
       ],
       "inputs": [
         {
@@ -578,6 +578,15 @@
             "name": "estilo_prompt"
           },
           "link": null
+        },
+        {
+          "localized_name": "bubble size",
+          "name": "tamano_globo",
+          "type": "COMBO",
+          "widget": {
+            "name": "tamano_globo"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -612,7 +621,8 @@
         "auto",
         0.08,
         195,
-        "tags (Illustrious / NoobAI)"
+        "tags (Illustrious / NoobAI)",
+        "medium"
       ],
       "id": 8,
       "pos": [

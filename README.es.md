@@ -53,6 +53,7 @@ Versión todo en uno que solo escribe sobre la imagen, sin tocar el prompt.
 | `margin` | Espacio entre el texto y el borde del globo. |
 | `white threshold` | Qué tan blanco debe ser el globo. Bájalo si no detecta globos algo grises. |
 | `prompt style` | (Solo en Bubble Text · Prompt) `natural (Anima)` pide el globo con frases; `tags (Illustrious / NoobAI)` usa tags estilo Danbooru, que los modelos basados en SDXL siguen mejor. |
+| `bubble size` | (Solo en Bubble Text · Prompt) `small`, `medium` (por defecto) o `large`. Evita `large` con Anima: a veces convierte la imagen entera en un globo gigante. |
 
 ## Emojis
 

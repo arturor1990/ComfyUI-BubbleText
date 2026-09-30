@@ -381,21 +381,35 @@ STYLE_NATURAL = "natural (Anima)"
 STYLE_TAGS = "tags (Illustrious / NoobAI)"
 
 
-def bubble_prompt(texts, style=STYLE_NATURAL):
-    """Fragmento de prompt: pide globos blancos con contorno negro, que es lo que mejor se detecta."""
+SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE = "small", "medium", "large"
+
+
+def bubble_prompt(texts, style=STYLE_NATURAL, size=SIZE_MEDIUM):
+    """Fragmento de prompt: pide globos blancos con contorno negro, que es lo que mejor se detecta.
+
+    Sin "large" por defecto: con esa palabra Anima a veces convierte la imagen entera en un globo gigante.
+    """
+    n = len(texts)
     if style == STYLE_TAGS:
         # CLIP de SDXL entiende mejor tags que frases; el texto real lo escribe el nodo después
-        if len(texts) == 1:
-            return "speech bubble, (white speech bubble:1.2), black outline, english text, large speech bubble at the top"
-        return (f"speech bubbles, {len(texts)} speech bubbles, (white speech bubbles:1.2), black outline, "
-                "english text")
-    if len(texts) == 1:
-        return ("speech bubble, english text, a single large white speech bubble with a thick black outline "
-                f'and black text at the top of the image, the speech bubble says "{texts[0]}"')
+        base = "speech bubble" if n == 1 else f"speech bubbles, {n} speech bubbles"
+        white = "(white speech bubble:1.2)" if n == 1 else "(white speech bubbles:1.2)"
+        extra = {SIZE_SMALL: ", small speech bubble, upper corner",
+                 SIZE_MEDIUM: "",
+                 SIZE_LARGE: ", large speech bubble at the top"}.get(size, "")
+        return f"{base}, {white}, black outline, english text{extra}"
+    if n == 1:
+        bubble = {SIZE_SMALL: "a small white speech bubble with a black outline and black text in a top corner of the image",
+                  SIZE_MEDIUM: "a white speech bubble with a black outline and black text near the top of the image, next to the character",
+                  SIZE_LARGE: "a large white speech bubble with a black outline and black text at the top of the image",
+                  }.get(size)
+        bubble = bubble or "a white speech bubble with a black outline and black text near the top of the image"
+        return f'speech bubble, english text, {bubble}, the speech bubble says "{texts[0]}"'
+    adjective = {SIZE_SMALL: "small ", SIZE_LARGE: "large "}.get(size, "")
     ordinals = ["first", "second", "third", "fourth", "fifth", "sixth"]
     says = ", ".join(f'the {ordinals[min(i, 5)]} speech bubble says "{t}"' for i, t in enumerate(texts))
-    return (f"speech bubbles, english text, {len(texts)} separate white speech bubbles with thick black outlines "
-            f"and black text, {says}")
+    return (f"speech bubbles, english text, {n} separate {adjective}white speech bubbles with black outlines "
+            f"and black text near the top of the image, {says}")
 
 
 def text_color(setting, paper_lum):
@@ -518,7 +532,11 @@ class SpeechBubblePrompt:
         return {"required": {"prompt": ("STRING", {"forceInput": True}), **settings_inputs(),
                              "estilo_prompt": ([STYLE_NATURAL, STYLE_TAGS], {
                                  "display_name": "prompt style",
-                                 "tooltip": "natural: full sentences (Anima). tags: Danbooru style (Illustrious, NoobAI, Pony)."})}}
+                                 "tooltip": "natural: full sentences (Anima). tags: Danbooru style (Illustrious, NoobAI, Pony)."}),
+                             "tamano_globo": ([SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE], {
+                                 "default": SIZE_MEDIUM, "display_name": "bubble size",
+                                 "tooltip": "How big to ask for the bubble. 'large' can make some models (Anima) "
+                                            "turn the whole image into a giant bubble."})}}
 
     @classmethod
     def VALIDATE_INPUTS(cls, orden_lectura):
@@ -537,7 +555,8 @@ class SpeechBubblePrompt:
         texts = [t for t in texts if t]
         if cfg["activado"] and texts:
             style = cfg.get("estilo_prompt", STYLE_NATURAL)
-            prompt = f"{prompt.rstrip().rstrip(',')}, {bubble_prompt(texts, style)}"
+            size = cfg.get("tamano_globo", SIZE_MEDIUM)
+            prompt = f"{prompt.rstrip().rstrip(',')}, {bubble_prompt(texts, style, size)}"
         return (prompt, cfg)
 
 

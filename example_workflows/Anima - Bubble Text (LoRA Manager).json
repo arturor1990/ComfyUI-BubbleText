@@ -533,7 +533,7 @@
       "type": "SpeechBubblePrompt",
       "size": [
         460,
-        420
+        440
       ],
       "inputs": [
         {
@@ -640,6 +640,15 @@
             "name": "estilo_prompt"
           },
           "link": null
+        },
+        {
+          "localized_name": "bubble size",
+          "name": "tamano_globo",
+          "type": "COMBO",
+          "widget": {
+            "name": "tamano_globo"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -674,7 +683,8 @@
         "auto",
         0.08,
         195,
-        "natural (Anima)"
+        "natural (Anima)",
+        "medium"
       ],
       "id": 9,
       "pos": [
